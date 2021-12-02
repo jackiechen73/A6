@@ -1,9 +1,12 @@
 #ifndef WATCARD_H
 #define WATCARD_H
 
+#include <uFuture.h>
+
 class WATCard {
 	WATCard( const WATCard & ) = delete;	// prevent copying
 	WATCard & operator=( const WATCard & ) = delete;
+    unsigned int balance;                   // current balance in WATCard
   public:
 	typedef Future_ISM<WATCard *> FWATCard;	// future watcard pointer
 	WATCard();
