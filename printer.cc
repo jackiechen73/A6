@@ -6,7 +6,7 @@
 using namespace std;        // direct access to std
 
 Printer::Printer( unsigned int numStudents, unsigned int numVendingMachines, unsigned int numCouriers )
-: numStud( numStudents ), numMach( numVendingMachine ), numCour( numCouriers ), 
+: numStud( numStudents ), numMach( numVendingMachines ), numCour( numCouriers ), 
 arrayOfBuff( new SingleBuff[NUM_UNIQUE + numStudents + numVendingMachines + numCouriers] ) {
     cout << "Parent\tGropoff\tWATOff\tNames\tTruck\tPlant";
     for ( unsigned int i = 0; i < numStud; i += 1 ) {
@@ -19,7 +19,7 @@ arrayOfBuff( new SingleBuff[NUM_UNIQUE + numStudents + numVendingMachines + numC
         cout << "\tCour" << i;
     } // for
     cout << endl;
-    for ( unsigned int i = 0; i < NUM_UNIQUE + numStud + numMach + numCour - 1; i += 1 ) {
+    for ( unsigned int i = 0; i < NUM_UNIQUE + numStud + numMach + numCour; i += 1 ) {
         cout << "*******\t";
     } // for
     cout << "*******" << endl;
@@ -48,10 +48,10 @@ void Printer::printValue2( SingleBuff& buff ) {
 
 void Printer::flush() {
     unsigned int i = 0;
-    int numMissingTabs = 0
+    int numMissingTabs = 0;
     for ( ; i < NUM_UNIQUE; i += 1 ) {
         printTabs( arrayOfBuff[i], numMissingTabs );
-        printUnique( arrayOfBuff[i], i );
+        printUnique( arrayOfBuff[i], Kind(i) );
     } // for
     for ( ; i < numStud; i += 1 ) {
         printTabs( arrayOfBuff[i], numMissingTabs );
@@ -59,7 +59,7 @@ void Printer::flush() {
     } // for
     for ( ; i < numMach; i += 1 ) {
         printTabs( arrayOfBuff[i], numMissingTabs );
-        printMach( arrayOfBuff[i] );
+        printMachBuff( arrayOfBuff[i] );
     } // for
     for ( ; i < numCour; i += 1 ) {
         printTabs( arrayOfBuff[i], numMissingTabs );
@@ -187,7 +187,7 @@ void Printer::print( Kind kind, char state, unsigned int value1, unsigned int va
 
 void Printer::print( Kind kind, unsigned int lid, char state ) {
     unsigned int index = getIndex( kind, lid );
-    SingleBuff& buff = arrayOfBuff[index]
+    SingleBuff& buff = arrayOfBuff[index];
     // flush if buffer not empty
     if ( !buff.empty ) { flush(); } // if
     buff.state = state;
@@ -196,7 +196,7 @@ void Printer::print( Kind kind, unsigned int lid, char state ) {
 
 void Printer::print( Kind kind, unsigned int lid, char state, unsigned int value1 ) {
     unsigned int index = getIndex( kind, lid );
-    SingleBuff& buff = arrayOfBuff[index]
+    SingleBuff& buff = arrayOfBuff[index];
     // flush if buffer not empty
     if ( !buff.empty ) { flush(); } // if
     buff.state = state;
@@ -206,7 +206,7 @@ void Printer::print( Kind kind, unsigned int lid, char state, unsigned int value
 
 void Printer::print( Kind kind, unsigned int lid, char state, unsigned int value1, unsigned int value2 ) {
     unsigned int index = getIndex( kind, lid );
-    SingleBuff& buff = arrayOfBuff[index]
+    SingleBuff& buff = arrayOfBuff[index];
     // flush if buffer not empty
     if ( !buff.empty ) { flush(); } // if
     buff.state = state;

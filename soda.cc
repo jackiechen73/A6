@@ -1,5 +1,6 @@
 #include "config.h"
 #include "MPRNG.h"
+#include "printer.h"
 #include <iostream>
 #include <string>
 
@@ -36,13 +37,26 @@ int main(int argc, char* argv[]) {
     // call processConfigFile
     ConfigParms configParams;
     processConfigFile(configFile.c_str(), configParams);
+    /*
+    cout << configParams.sodaCost << endl;
+    cout << configParams.numStudents << endl;
+    cout << configParams.maxPurchases << endl;
+    cout << configParams.numVendingMachines << endl;
+    cout << configParams.maxStockPerFlavour << endl;
+    cout << configParams.maxShippedPerFlavour << endl;
+    cout << configParams.timeBetweenShipments << endl;
+    cout << configParams.groupoffDelay << endl;
+    cout << configParams.parentalDelay << endl;
+    cout << configParams.numCouriers << endl;
+    */
 
     mprng.set_seed( seed );         // initialize MPRNG 
 
 	// create additional processors
 	uProcessor p[processors - 1];   // number of kernel threads
 	if ( processors == 1 ) uThisProcessor().setPreemption( 0 ); // turn off time-slicing for reproducibility
-
+    
+    Printer printer( configParams.numStudents, configParams.numVendingMachines, configParams.numCouriers );
     /*
         printer, bank, parent, WATCard office, groupoff, name server,
         vending machines, bottling plant, and students. 
