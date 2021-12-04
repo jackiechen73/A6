@@ -4,29 +4,41 @@ Groupoff::Groupoff( Printer & prt, unsigned int numStudents, unsigned int sodaCo
 : printer(prt), numStudents(numStudents), sodaCost(sodaCost), groupoffDelay(groupoffDelay), WATCardList( new WATCard::FWATCard[numStudents] ) {}
 
 WATCard::FWATCard Groupoff::giftCard() {
-    return WATCardlist[assigned];
+    return WATCardlist[cardIdx];
 }
 
 void Groupoff::main() {
     printer->print(Printer::Kind::Groupoff, 'S'); // start
     // each student obtains a future
-    while ( assigned < numStudents ) {
+    while ( cardIdx < numStudents ) {
         _Accept( giftCard ); 
-        assigned += 1;
+        cardIdx += 1;
     } // while
 
-    assigned -= 1;
+    cardIdx -= 1;
+    bool deposited[numStudents] = { false };
+
     // add money to each watcard
-    while ( assigned >= 0 ) {
+    while ( cardIdx >= 0 ) {
         _Accept( ~Groupoff ) {
             break; // break for loop if destructor is called
         } _Else {
-            WATCard * watCard = new WATCard(); // create new watcard
-			watCard->deposit(sodaCost); // deposit money into watcard
-			yield(groupOffDelay); // delay
-            WATCardList[assigned].delivery(watCard); // deliver watcard
-			printer->print(Printer::Kind::Groupoff, 'D', sodaCost); // deliver
-            asigned -= 1;
+            yield(groupOffDelay); // delay
+            unsigned int depositIndex = mprng(0, cardIdx); // generate random deposit
+            // loop through to find the depositIndex-th undeposited card
+            for ( int i = 0; i < numStudents; i += 1 ) {
+                if ( deposited[i] ) { continue; }
+                if ( depositIndex == 0 ) {
+                    WATCard * watCard = new WATCard(); // create new watcard
+			        watCard->deposit(sodaCost); // deposit money into watcard
+                    WATCardlist[i].delivery(watCard); // deliver watcard
+                    printer->print(Printer::Kind::Groupoff, 'D', sodaCost); // deliver
+                    cardIdx -= 1;
+                    deposited[i] = true;
+                    break;
+                } // if
+                depositIndex -= 1;
+            } // for
         } // _Accept
     } // while
     printer->print(Printer::Kind::Groupoff, 'F'); // finish

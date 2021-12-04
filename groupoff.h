@@ -14,7 +14,7 @@ _Task Groupoff {
     unsigned int numStudents;
     unsigned int sodaCost;
     unsigned int groupoffDelay;
-    unsigned int unassigned = 0; // index of first unassigned WATCard
+    unsigned int cardIdx = 0; // index of first unassigned WATCard
     std::unique_ptr<WATCard::FWATCard []> WATCardList; 
   public:
 	Groupoff( Printer & prt, unsigned int numStudents, unsigned int sodaCost, unsigned int groupoffDelay );

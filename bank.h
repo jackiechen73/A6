@@ -5,7 +5,7 @@
 
 _Monitor Bank {
     std::unique_ptr<unsigned int []> balances;
-    std::unique_ptr<uCondition> withdrawBench;
+    std::unique_ptr<uCondition []> withdrawBench;
     unsigned int numStudents; 
   public:
 	Bank( unsigned int numStudents );

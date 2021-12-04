@@ -4,13 +4,17 @@ Bank::Bank( unsigned int numStudents ) : numStudents(numStudents), balances( new
 
 void Bank::deposit( unsigned int id, unsigned int amount ) {
     balances[id] += amount;
-    withdrawBench[id].signal();
+    if ( !withdrawBench[id].empty() && withdrawBench[id].front() >= balances[id] ) {
+        withdrawBench[id].signal();
+    } // if
 }
 
 void Bank::withdraw( unsigned int id, unsigned int amount ) {
-    while ( balances[id] < amount ) {
-        withdrawBench[id].wait();
-    } // while
+    if ( balances[id] < amount ) {
+        withdrawBench[id].wait( amount );
+    } // if
     balances[id] -= amount;
-    withdrawBench[id].signal(); // wake up next withdrawal
+    if ( !withdrawBench[id].empty() && withdrawBench[id].front() >= balances[id] ) {
+        withdrawBench[id].signal();
+    } // if
 }
