@@ -16,11 +16,9 @@ _Task VendingMachine {
 	unsigned int * sodaInventory;
 	void main();
   public:
-	enum Flavours { 
-        BLUES, 
-        BLACK_CHERRY, 
-        CLASSIC, 
-        CREAM_SODA, 
+	enum Flavours {
+        BLUES_BLACK_CHERRY, 
+        CLASSIC_CREAM_SODA, 
         ROCK_ROOT_BEER, 
         JAZZ_LIME, 
         NUM_FLAVOURS 

@@ -5,7 +5,7 @@ VendingMachine::VendingMachine(Printer & prt, NameServer & nameServer, unsigned 
     printer(prt), nameServer(nameServer), id(id), sodaCost(sodaCost), sodaInventory(new unsigned int[NUM_FLAVOURS]{0}) {}
 
 void VendingMachine::main() {
-    printer.print(Printer::Kind::Vending, id, 'S'); // start
+    printer.print(Printer::Kind::Vending, id, 'S', sodaCost); // start
     nameServer.VMregister(this); // register with name server
     for ( ;; ) {
         try {
