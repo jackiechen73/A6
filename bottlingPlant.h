@@ -2,6 +2,9 @@
 #define BOTTLINGPLANT_H
 #include "printer.h"
 #include "nameServer.h"
+#include "MPRNG.h"
+
+extern MPRNG mprng;     // access MPRNG object from program main
 
 _Task BottlingPlant {
     Printer* printer;
@@ -12,6 +15,7 @@ _Task BottlingPlant {
     unsigned int timeBetweenShipments;
 
     bool waitingForTruck;
+    bool shutdown;
     std::unique_ptr<unsigned int[]> stock;
     void main();
   public:

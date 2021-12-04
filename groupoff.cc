@@ -1,10 +1,10 @@
 #include "Groupoff.h"
 
 Groupoff::Groupoff( Printer & prt, unsigned int numStudents, unsigned int sodaCost, unsigned int groupoffDelay )
-: printer(prt), numStudents(numStudents), sodaCost(sodaCost), groupoffDelay(groupoffDelay), WATCardList( new WATCard::FWATCard[numStudents] ) {}
+: printer(&prt), numStudents(numStudents), sodaCost(sodaCost), groupoffDelay(groupoffDelay), WATCardList( new WATCard::FWATCard[numStudents] ) {}
 
 WATCard::FWATCard Groupoff::giftCard() {
-    return WATCardlist[cardIdx];
+    return WATCardList[cardIdx];
 }
 
 void Groupoff::main() {
@@ -15,23 +15,22 @@ void Groupoff::main() {
         cardIdx += 1;
     } // while
 
-    cardIdx -= 1;
     bool deposited[numStudents] = { false };
 
     // add money to each watcard
-    while ( cardIdx >= 0 ) {
+    while ( cardIdx > 0 ) {
         _Accept( ~Groupoff ) {
             break; // break for loop if destructor is called
         } _Else {
-            yield(groupOffDelay); // delay
-            unsigned int depositIndex = mprng(0, cardIdx); // generate random deposit
+            yield(groupoffDelay); // delay
+            unsigned int depositIndex = mprng(0, cardIdx-1); // generate random deposit
             // loop through to find the depositIndex-th undeposited card
-            for ( int i = 0; i < numStudents; i += 1 ) {
+            for ( unsigned int i = 0; i < numStudents; i += 1 ) {
                 if ( deposited[i] ) { continue; }
                 if ( depositIndex == 0 ) {
                     WATCard * watCard = new WATCard(); // create new watcard
 			        watCard->deposit(sodaCost); // deposit money into watcard
-                    WATCardlist[i].delivery(watCard); // deliver watcard
+                    WATCardList[i].delivery(watCard); // deliver watcard
                     printer->print(Printer::Kind::Groupoff, 'D', sodaCost); // deliver
                     cardIdx -= 1;
                     deposited[i] = true;

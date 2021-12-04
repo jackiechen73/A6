@@ -3,8 +3,10 @@
 #include "printer.h"
 #include "nameServer.h"
 #include "bottlingPlant.h"
-
+#include "MPRNG.h"
 #include <memory.h>
+
+extern MPRNG mprng;     // access MPRNG object from program main
 
 _Task Truck {
 	Printer& printer;
@@ -13,9 +15,10 @@ _Task Truck {
 	unsigned int numVendingMachines;
 	unsigned int maxStockPerFlavour;
 
-	std::unique_ptr<unsigned int[]> cargo;
+	unsigned int * cargo;
 
 	bool isCargoEmpty();
+    unsigned int cargoCount();
 	void main();
   public:
 	Truck( Printer & prt, NameServer & nameServer, BottlingPlant & plant,
