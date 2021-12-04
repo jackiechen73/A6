@@ -1,4 +1,4 @@
-#include "Bank.h"
+#include "bank.h"
 
 Bank::Bank( unsigned int numStudents ) : numStudents(numStudents), balances( new unsigned int[numStudents] ), withdrawBench( new uCondition[numStudents] ) {}
 

@@ -1,7 +1,7 @@
 #ifndef GROUPOFF_H
 #define GROUPOFF_H
 
-#include "Printer.h"
+#include "printer.h"
 #include "WATCard.h"
 #include "MPRNG.h"
 #include <memory.h>

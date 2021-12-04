@@ -1,10 +1,19 @@
 #ifndef VENDINGMACHINE_H
 #define VENDINGMACHINE_H
+#include "printer.h"
+#include "nameServer.h"
+#include "WATCard.h"
 
 _Task VendingMachine {
+	Printer& printer;
+	NameServer& nameServer;
+	unsigned int id;
+	unsigned int sodaCost;
+
+	std::unique_ptr<unsigned int[]> sodaInventory;
 	void main();
   public:
-	enum Flavours { ... }; 				// flavours of soda (YOU DEFINE)
+	enum Flavours { BLUES, BLACK_CHERRY, CLASSIC, CREAM_SODA, ROCK_ROOT_BEER, JAZZ_LIME, NUM_FLAVOURS }; 				// flavours of soda (YOU DEFINE)
 	_Event Free {};						// free, advertisement
 	_Event Funds {};					// insufficient funds
 	_Event Stock {};					// flavour out of stock
