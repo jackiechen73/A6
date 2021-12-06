@@ -48,9 +48,9 @@ int main(int argc, char* argv[]) {
 
     mprng.set_seed( seed );         // initialize MPRNG 
 
-	// create additional processors
-	uProcessor p[processors - 1];   // number of kernel threads
-	if ( processors == 1 ) uThisProcessor().setPreemption( 0 ); // turn off time-slicing for reproducibility
+    // create additional processors
+    uProcessor p[processors - 1];   // number of kernel threads
+    if ( processors == 1 ) uThisProcessor().setPreemption( 0 ); // turn off time-slicing for reproducibility
     
     /*
         printer, bank, parent, WATCard office, groupoff, name server,

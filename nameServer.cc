@@ -25,11 +25,12 @@ void NameServer::main() {
     for (;;) {
         _Accept(~NameServer) {
             break;
+        } or _Accept(getMachineList) {
         } or _Accept(getMachine) { 
             printer.print(Printer::NameServer, 'N', studId, studentAssignments[studId]);
             // increment vending machine assignment for next call to getMachine
             studentAssignments[studId] = (studentAssignments[studId] + 1) % numVendingMachines;
-        } or _Accept(getMachineList);
+        } 
     } // for
     printer.print(Printer::NameServer, 'F'); // finish
 }
