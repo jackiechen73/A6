@@ -2,7 +2,7 @@ CXX = u++					# compiler
 CXXFLAGS = -g -multi -O2 -Wall -Wextra -MMD
 MAKEFILE_NAME = ${firstword ${MAKEFILE_LIST}}	# makefile name
 
-OBJECTS = printer.o config.o soda.o#bank.o bottlingPlant.o config.o groupoff.o nameServer.o parent.o printer.o student.o soda.o truck.o vendingMachine.o WATCard.o WATCardOffice.o # list of object files
+OBJECTS = bank.o bottlingPlant.o config.o groupoff.o nameServer.o parent.o printer.o student.o soda.o truck.o vendingMachine.o WATCard.o WATCardOffice.o # list of object files
 EXEC = soda
 
 DEPENDS = ${OBJECTS:.o=.d}			# substitute ".o" with ".d"

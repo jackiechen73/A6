@@ -7,22 +7,25 @@
 extern MPRNG mprng;     // access MPRNG object from program main
 
 _Task BottlingPlant {
-    Printer* printer;
-    NameServer* nameServer;
-    unsigned int numVendingMachines;
-    unsigned int maxShippedPerFlavour;
+    Printer & printer;                  // shared printer
+    NameServer & nameServer;            // shared name server
+    unsigned int numVendingMachines;    // number of vending machines
+    unsigned int maxShippedPerFlavour; 
     unsigned int maxStockPerFlavour;
     unsigned int timeBetweenShipments;
 
-    bool waitingForTruck;
-    bool shutdown;
-    std::unique_ptr<unsigned int[]> stock;
-    void main();
+    bool shutdown = false;
+    uCondition updatingCargo; // wait for bottling plant to update cargo
+    unsigned int * stock; // amount of each flavour produced
+    unsigned int * cargo; // communication variable
+    void productionRun(); // simulates a production run
+    void main(); // task main
   public:
 	_Event Shutdown {};					// shutdown plant
 	BottlingPlant( Printer & prt, NameServer & nameServer, unsigned int numVendingMachines,
 				 unsigned int maxShippedPerFlavour, unsigned int maxStockPerFlavour,
 				 unsigned int timeBetweenShipments );
+    ~BottlingPlant();
 	void getShipment( unsigned int cargo[] );
 };
 

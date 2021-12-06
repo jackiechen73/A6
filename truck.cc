@@ -7,6 +7,10 @@ Truck::Truck(Printer & prt, NameServer & nameServer, BottlingPlant & plant,
     numVendingMachines(numVendingMachines), maxStockPerFlavour(maxStockPerFlavour),
     cargo(new unsigned int[VendingMachine::NUM_FLAVOURS]{0}) {}
 
+Truck::~Truck() {
+    delete [] cargo;
+}
+
 void Truck::main() {
     printer.print(Printer::Kind::Truck, 'S');
     // get array of vending machine pointers
@@ -26,35 +30,40 @@ void Truck::main() {
         
         // transfer as much of each kind of soda to each machine
         unsigned int startingMachine = curMachine;
-        for ( ; curMachine != startingMachine; curMachine = (curMachine + 1) % numVendingMachines ) {
-            printer.print(Printer::Kind::Truck, 'd', curMachine, cargoCount());
+        for ( ;; ) {
+            printer.print(Printer::Kind::Truck, 'd', curMachine, cargoCount()); // begin delivery
             // get inventory of curMachine
-            unsigned int *inventory = machineList[curMachine] -> inventory();
+            unsigned int * inventory = machineList[curMachine]->inventory();
             // transfer as much soda as possible
-            unsigned int unsuccessful = 0;
+            unsigned int unsuccessful = 0; // number of unfilled inventory
             for ( unsigned int i = 0; i < VendingMachine::NUM_FLAVOURS; i++ ) {
                 unsigned requestAmount = maxStockPerFlavour - inventory[i];
                 // if request amount exceeds the amount in cargo, empty the cargo
-                if (requestAmount > cargo[i]) {
+                if (requestAmount > cargo[i]) { // not enough cargo?
+                    unsuccessful += requestAmount - cargo[i];
                     inventory[i] += cargo[i];
                     cargo[i] = 0;
                 } else {
-                    unsuccessful += requestAmount - cargo[i];
                     inventory[i] += requestAmount;
                     cargo[i] -= requestAmount;
-                }
-            }
+                } // if
+            } // for
             if ( unsuccessful > 0 ) {
                 printer.print(Printer::Kind::Truck, 'U', curMachine, unsuccessful);
             } // if
-            printer.print(Printer::Kind::Truck, 'D', curMachine, cargoCount());
-            machineList[curMachine]->restocked();
+            printer.print(Printer::Kind::Truck, 'D', curMachine, cargoCount()); // end delivery
 
-            // flat tire
-            if (mprng(99) == 0) yield(10);
+            machineList[curMachine]->restocked(); // notify vending machine restocking is finished
 
-            // check if truck is empty
-            if (isCargoEmpty()) break;
+            if (mprng(99) == 0) {
+                printer.print(Printer::Kind::Truck, 'X');
+                yield(10); // yield for flat tire
+            }
+
+            if (isCargoEmpty()) break; // restock if truck is empty
+
+            curMachine = (curMachine + 1) % numVendingMachines;
+            if (curMachine == startingMachine) break;
         } // for
     } // for
     printer.print(Printer::Kind::Truck, 'F');

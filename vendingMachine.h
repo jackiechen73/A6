@@ -9,11 +9,23 @@ extern MPRNG mprng;     // access MPRNG object from program main
 _Task NameServer; // forward declaration
 
 _Task VendingMachine {
-	Printer& printer;
-	NameServer& nameServer;
+	Printer & printer;
+	NameServer & nameServer;
 	unsigned int id;
 	unsigned int sodaCost;
 	unsigned int * sodaInventory;
+
+    uCondition purchasing;
+    unsigned int requestedFlavour; // communication variable
+	WATCard * buyerCard; // communication variable
+    enum PurchaseResult {
+        SUCCESS,
+        FUNDS,
+        STOCK,
+        FREE
+    }; // result of purchase
+    PurchaseResult purchaseResult; // communication variable
+
 	void main();
   public:
 	enum Flavours {
@@ -22,12 +34,13 @@ _Task VendingMachine {
         ROCK_ROOT_BEER, 
         JAZZ_LIME, 
         NUM_FLAVOURS 
-    }; // flavours of soda (YOU DEFINE)
+    }; // flavours of soda
 	_Event Free {};						// free, advertisement
 	_Event Funds {};					// insufficient funds
 	_Event Stock {};					// flavour out of stock
 	VendingMachine( Printer & prt, NameServer & nameServer, unsigned int id, unsigned int sodaCost );
-	void buy( Flavours flavour, WATCard & card );
+	~VendingMachine();
+    void buy( Flavours flavour, WATCard & card );
 	unsigned int * inventory();
 	void restocked();
 	_Nomutex unsigned int cost() const;

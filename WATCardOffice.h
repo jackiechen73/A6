@@ -1,7 +1,13 @@
 #ifndef WATCARDOFFICE_H
 #define WATCARDOFFICE_H
-#include <deque.h>
+#include "printer.h"
+#include "bank.h"
+#include "WATCard.h"
+#include "MPRNG.h"
+#include <deque>
 #include <memory.h>
+
+extern MPRNG mprng;     // access MPRNG object from program main
 
 _Task WATCardOffice {
 	struct Job {							// marshalled arguments and return future
@@ -14,8 +20,8 @@ _Task WATCardOffice {
 	_Task Courier { 
         unsigned int id;
         WATCardOffice * cardOffice;
-        Printer& printer;
-        Bank& bank;
+        Printer & printer;
+        Bank & bank;
         void main();
       public:
         Courier(unsigned int id, WATCardOffice * cardOffice, Printer& printer, Bank& bank);

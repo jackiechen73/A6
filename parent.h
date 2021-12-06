@@ -8,13 +8,14 @@
 extern MPRNG mprng;     // access MPRNG object from program main
 
 _Task Parent {
-	void main();
-    Printer* printer;
-    Bank* bank;
-    unsigned int numStudents;
-    unsigned int parentalDelay;
-  public:
-	Parent( Printer & prt, Bank & bank, unsigned int numStudents, unsigned int parentalDelay );
+    private:
+        Printer & printer;
+        Bank & bank;
+        unsigned int numStudents;
+        unsigned int parentalDelay;
+	    void main(); // task main
+    public:
+	    Parent( Printer & prt, Bank & bank, unsigned int numStudents, unsigned int parentalDelay );
 };
 
 #endif

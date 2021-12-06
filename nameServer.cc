@@ -3,15 +3,23 @@
 NameServer::NameServer( Printer & prt, unsigned int numVendingMachines, unsigned int numStudents )
 : printer(prt), numVendingMachines(numVendingMachines), numStudents(numStudents), 
 studentAssignments( new unsigned int[numStudents]), machineList(new VendingMachine*[numVendingMachines]) {
+    // assign each student a vending machine
     for (unsigned int i = 0; i < numStudents; i += 1) {
         studentAssignments[i] = i % numVendingMachines;
     } // for
 }
 
+NameServer::~NameServer() {
+    delete [] studentAssignments;
+    // machines will already be terminated
+    delete [] machineList;
+}
+
 void NameServer::main() {
-    printer.print(Printer::NameServer, 'S');
-    for (int i == 0 ; i < numVendingMachines; i += 1 ) {
+    printer.print(Printer::NameServer, 'S'); // start
+    for (unsigned int i = 0 ; i < numVendingMachines; i += 1 ) {
         _Accept(VMregister);
+        printer.print(Printer::NameServer, 'R', VMidx);
         VMidx += 1;
     } // for
     for (;;) {
@@ -19,20 +27,20 @@ void NameServer::main() {
             break;
         } or _Accept(getMachine) { 
             printer.print(Printer::NameServer, 'N', studId, studentAssignments[studId]);
+            // increment vending machine assignment for next call to getMachine
             studentAssignments[studId] = (studentAssignments[studId] + 1) % numVendingMachines;
-        } or _Accept(getMachineList) {}
+        } or _Accept(getMachineList);
     } // for
-    printer.print(Printer::NameServer, 'F');
+    printer.print(Printer::NameServer, 'F'); // finish
 }
 
 void NameServer::VMregister( VendingMachine * vendingmachine ) {
-    vendingMachines[VMidx] = vendingmachine;
-    printer.print(Printer::NameServer, 'R', vendingmachine->getId());
+    machineList[VMidx] = vendingmachine;
 }
 
 VendingMachine * NameServer::getMachine( unsigned int id ) {
     studId = id;
-    return vendingMachines[studentAssignments[id]];
+    return machineList[studentAssignments[id]];
 }
 
 VendingMachine ** NameServer::getMachineList() {

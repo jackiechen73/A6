@@ -1,10 +1,18 @@
+#include "bank.h"
+#include "bottlingplant.h"
 #include "config.h"
-#include "MPRNG.h"
+#include "groupoff.h"
+#include "nameserver.h"
+#include "parent.h"
 #include "printer.h"
+#include "student.h"
+#include "vendingmachine.h"
+#include "watcardoffice.h"
+#include "MPRNG.h"
 #include <iostream>
 #include <string>
 
-using namespace std;
+using namespace std; // direct access to std namespace
 MPRNG mprng; // MPRNG object for random number generation
 
 int main(int argc, char* argv[]) {
@@ -35,20 +43,8 @@ int main(int argc, char* argv[]) {
     } // try
 
     // call processConfigFile
-    ConfigParms configParams;
-    processConfigFile(configFile.c_str(), configParams);
-    /*
-    cout << configParams.sodaCost << endl;
-    cout << configParams.numStudents << endl;
-    cout << configParams.maxPurchases << endl;
-    cout << configParams.numVendingMachines << endl;
-    cout << configParams.maxStockPerFlavour << endl;
-    cout << configParams.maxShippedPerFlavour << endl;
-    cout << configParams.timeBetweenShipments << endl;
-    cout << configParams.groupoffDelay << endl;
-    cout << configParams.parentalDelay << endl;
-    cout << configParams.numCouriers << endl;
-    */
+    ConfigParms configParms;
+    processConfigFile(configFile.c_str(), configParms);
 
     mprng.set_seed( seed );         // initialize MPRNG 
 
@@ -56,17 +52,48 @@ int main(int argc, char* argv[]) {
 	uProcessor p[processors - 1];   // number of kernel threads
 	if ( processors == 1 ) uThisProcessor().setPreemption( 0 ); // turn off time-slicing for reproducibility
     
-    Printer printer( configParams.numStudents, configParams.numVendingMachines, configParams.numCouriers );
     /*
         printer, bank, parent, WATCard office, groupoff, name server,
         vending machines, bottling plant, and students. 
         The truck is created by the bottling plant; the couriers are created by
         the WATCard office.
     */
+    Printer printer( configParms.numStudents, configParms.numVendingMachines, configParms.numCouriers );
+    Bank bank(configParms.numStudents);
+    Parent parent(printer, bank, configParms.numStudents, configParms.parentalDelay);
+    WATCardOffice cardoffice(printer, bank, configParms.numCouriers);
+    // couriers created by WATCardOffice
+    Groupoff groupoff(printer, configParms.numStudents, configParms.sodaCost, configParms.groupoffDelay);
+    NameServer nameserver(printer, configParms.numVendingMachines, configParms.numStudents);
+    
+    VendingMachine * VMs[configParms.numVendingMachines];
+    // generate each vending machine
+    for (unsigned int i = 0; i < configParms.numVendingMachines; i += 1) {
+        VMs[i] = new VendingMachine(printer, nameserver, i, configParms.sodaCost);
+    } // for
+
+    BottlingPlant * bottlingplant = new BottlingPlant(printer, nameserver, configParms.numVendingMachines, 
+        configParms.maxShippedPerFlavour, configParms.maxStockPerFlavour, configParms.timeBetweenShipments);
+    // truck created by bottlingplant
+
+    Student * students[configParms.numStudents];
+    // generate each student
+    for (unsigned int i = 0; i < configParms.numStudents; i += 1 ) {
+        students[i] = new Student(printer, nameserver, cardoffice, groupoff, i, configParms.maxPurchases);
+    } // for    
    
     /*
         The program terminates once all of the students have purchased their specified number of bottles.
         Note, there is one trick in closing down the system: delete the bottling plant before deleting the vending machines to
         allow the truck to complete its final deliveries to the vending machines; otherwise, a deadlock can occur.
     */
+    // delete students
+    for (unsigned int i = 0; i < configParms.numStudents; i++) {
+        delete students[i];
+    } // for
+    delete bottlingplant; // delete bottling plant
+    // delete vending machines
+    for (unsigned int i = 0; i < configParms.numVendingMachines; i++) {
+        delete VMs[i];
+    } // for
 }

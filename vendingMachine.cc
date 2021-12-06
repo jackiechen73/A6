@@ -4,6 +4,10 @@
 VendingMachine::VendingMachine(Printer & prt, NameServer & nameServer, unsigned int id, unsigned int sodaCost) :
     printer(prt), nameServer(nameServer), id(id), sodaCost(sodaCost), sodaInventory(new unsigned int[NUM_FLAVOURS]{0}) {}
 
+VendingMachine::~VendingMachine() {
+    delete [] sodaInventory;
+}
+
 void VendingMachine::main() {
     printer.print(Printer::Kind::Vending, id, 'S', sodaCost); // start
     nameServer.VMregister(this); // register with name server
@@ -15,29 +19,42 @@ void VendingMachine::main() {
                 printer.print(Printer::Vending, id, 'r');
                 _Accept(restocked);
                 printer.print(Printer::Vending, id, 'R');
-            } or _Accept(buy) {}
+            } or _Accept(buy) {
+                if (buyerCard->getBalance() < sodaCost) { // sufficient funds?
+                    purchaseResult = FUNDS;
+                } else if (sodaInventory[requestedFlavour] == 0) { // enough stock?
+                    purchaseResult = STOCK;
+                } else if (mprng(4) == 0) { // free drink?
+                    purchaseResult = FREE;
+                    sodaInventory[requestedFlavour] -= 1;
+                    printer.print(Printer::Kind::Vending, id, 'A');
+                } else {
+                    purchaseResult = SUCCESS;
+                    buyerCard->withdraw(sodaCost);
+                    sodaInventory[requestedFlavour] -= 1;
+                    printer.print(Printer::Kind::Vending, id, 'B', requestedFlavour, sodaInventory[requestedFlavour]);
+                } // if
+                purchasing.signalBlock();
+            }
         } catch (uMutexFailure::RendezvousFailure &) {} // catch accepts that fail
-    }
-    printer.print(Printer::Kind::Vending, id, 'F'); // start
+    } // for
+    printer.print(Printer::Kind::Vending, id, 'F'); // finish
 }
 
 void VendingMachine::buy(Flavours flavour, WATCard & card) {
-    if (card.getBalance() < sodaCost) { // sufficient funds?
-        _Throw Funds();
-    } // if
-
-    if (sodaInventory[flavour] == 0) { // enough stock?
-        _Throw Stock();
-    } // if
-
-    // free
-    if (mprng(4) == 0) { // free drink?
-        _Throw Free();
-    } else {
-        card.withdraw(sodaCost);
-    } // if
-    sodaInventory[(int) flavour] -= 1;
-    printer.print(Printer::Kind::Vending, id, 'B', flavour, sodaInventory[(int) flavour]);
+    requestedFlavour = (unsigned int) flavour;
+    buyerCard = &card;
+    purchasing.wait();
+    switch (purchaseResult) {
+        case PurchaseResult::SUCCESS:
+            break;
+        case PurchaseResult::FUNDS:
+            throw Funds();
+        case PurchaseResult::FREE:
+            throw Free();
+        case PurchaseResult::STOCK:
+            throw Stock();
+    }    
 }
 
 unsigned int *  VendingMachine::inventory() {

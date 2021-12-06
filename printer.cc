@@ -1,7 +1,7 @@
 #include "printer.h"
 #include <iostream>         // access cout
 
-#define NUM_UNIQUE  5
+#define NUM_UNIQUE  6
 
 using namespace std;        // direct access to std
 
@@ -19,7 +19,7 @@ arrayOfBuff( new SingleBuff[NUM_UNIQUE + numStudents + numVendingMachines + numC
         cout << "\tCour" << i;
     } // for
     cout << endl;
-    for ( unsigned int i = 0; i < NUM_UNIQUE + numStud + numMach + numCour; i += 1 ) {
+    for ( unsigned int i = 0; i < NUM_UNIQUE + numStud + numMach + numCour - 1; i += 1 ) {
         cout << "*******\t";
     } // for
     cout << "*******" << endl;
@@ -53,15 +53,15 @@ void Printer::flush() {
         printTabs( arrayOfBuff[i], numMissingTabs );
         printUnique( arrayOfBuff[i], Kind(i) );
     } // for
-    for ( ; i < numStud; i += 1 ) {
+    for ( ; i < NUM_UNIQUE + numStud; i += 1 ) {
         printTabs( arrayOfBuff[i], numMissingTabs );
         printStudBuff( arrayOfBuff[i] );
     } // for
-    for ( ; i < numMach; i += 1 ) {
+    for ( ; i < NUM_UNIQUE + numStud + numMach; i += 1 ) {
         printTabs( arrayOfBuff[i], numMissingTabs );
         printMachBuff( arrayOfBuff[i] );
     } // for
-    for ( ; i < numCour; i += 1 ) {
+    for ( ; i < NUM_UNIQUE + numStud + numMach + numCour; i += 1 ) {
         printTabs( arrayOfBuff[i], numMissingTabs );
         printCourBuff( arrayOfBuff[i] );
     } // for
@@ -69,15 +69,14 @@ void Printer::flush() {
 }
 
 void Printer::printTabs( SingleBuff& buff, int& numMissingTabs ) {
-    if ( buff.empty ) { // buffer is empty?
-        numMissingTabs += 1; 
-        return; 
-    } // if
-    // print number of missing tabs
-    for ( int i = 0; i < numMissingTabs; i += 1) {
-        cout << "\t";
-    } // for
-    numMissingTabs = 0; // reset number of missing tabs
+    if ( !buff.empty ) {
+        // print number of missing tabs
+        for ( int i = 0; i < numMissingTabs; i += 1) {
+            cout << "\t";
+        } // for
+        numMissingTabs = 0;
+    }    
+    numMissingTabs += 1; // need 1 tab to follow current output
 }
 
 void Printer::printUnique( SingleBuff& buff, Kind kind) {
