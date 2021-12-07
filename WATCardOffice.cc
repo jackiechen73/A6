@@ -11,6 +11,9 @@ void WATCardOffice::Courier::main() {
         unsigned int sid = job->sid;
         unsigned int amount = job->amount;
         WATCard * card = job->card;
+        if (card == nullptr) { // no WATCard?
+            card = new WATCard();
+        }
         printer.print(Printer::Kind::Courier, id, 't', sid, amount); 
         bank.withdraw( sid, amount ); // withdraw new amount from bank
         if ( mprng(5) == 0 ) { // lost card?
@@ -67,10 +70,9 @@ void WATCardOffice::main() {
 }
 
 WATCard::FWATCard WATCardOffice::create( unsigned int sid, unsigned int amount ) {
-	WATCard * card = new WATCard();
     WATCardOffice::sid = sid;
     WATCardOffice::amount = amount;
-    Job * job = new Job(sid, amount, card);
+    Job * job = new Job(sid, amount, nullptr);
 	jobs.push_back(job);
 	return job->result; // return watcard future
 }
