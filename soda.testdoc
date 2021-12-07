@@ -11,7 +11,7 @@ GroupoffDelay			10	  # length of time between initializing gift cards
 ParentalDelay			5	  # length of time between deposits of funds
 NumCouriers			1	  # maximum number of couriers in the pool
 
-losing watcard - default config, seed = 2
+losing watcard - default config, seed = 2, number of processors = 1
 Relevant output Line 1 - 16
 
 Stud0	Stud1	Mach0	Mach1	Mach2	Cour0
@@ -26,7 +26,7 @@ L		r
 L	V2				L0
 					t0,5
 B3,3		B3,1			T0,5
-	V0	                                
+	V0				           
 
 In this output we can see that when initializing Stud0, the courier Cour0 loses the watcard.
 This is indicated in the Cour0 output
@@ -61,19 +61,19 @@ Finally, the student has sufficient funds on their WATCard to make a purchase.
 This successful purchase is indicated in the Stud0 and Mach0 output.
 
 Stud0
-B3,3 - bought soda, soda flavour 3 purchased, WATCard balance 3
+B3,3 -> bought soda, soda flavour 3 purchased, WATCard balance 3
 
 Mach0
-B3,1 - student bought soda, soda flavour 3 purchased, amount remaining 1 of this flavour
+B3,1 -> student bought soda, soda flavour 3 purchased, amount remaining 1 of this flavour
 
 These results are correct since the soda cost is 2, it validates that 5 was initially loaded onto the WATCard
 since the remaining balance is now 3.
 
-
+- student only uses watcard - large groupoff delay
 - student uses gift card
-- student uses watcard
-- student has insufficient funds
-- vending machine is missing stock
-- vending machine gives free drink
-- truck completes a full cycle before restocking
+- student has insufficient funds 
+- vending machine is missing stock - lots of students, less machines
+- vending machine gives free drink - advertisement + buy right after
+- truck completes a full cycle before restocking - large number of MaxShippedPerFlavour
 - truck runs out of cargo before restocking
+- i/o - invalid parameters, invalid files
