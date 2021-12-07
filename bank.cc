@@ -5,7 +5,7 @@
  * It initializes all student balances to 0.
  * numStudents: total number of students 
  ****************************/
-Bank::Bank( unsigned int numStudents ) : numStudents( numStudents ), balances( new unsigned int[numStudents] ), withdrawBench( new uCondition[numStudents] ) {}
+Bank::Bank( unsigned int numStudents ) : numStudents( numStudents ), balances( new unsigned int[numStudents]{0} ), withdrawBench( new uCondition[numStudents] ) {}
 
 /***** Bank::~Bank *****
  * This is the deconstructor for the Bank monitor. 
@@ -23,7 +23,7 @@ Bank::~Bank() {
 void Bank::deposit( unsigned int id, unsigned int amount ) {
     balances[id] += amount; // deposit amount
     // if sufficient funds, wake up withdraw call
-    if ( !withdrawBench[id].empty() && withdrawBench[id].front() >= balances[id] ) {
+    if ( !withdrawBench[id].empty() && withdrawBench[id].front() <= balances[id] ) {
         withdrawBench[id].signal();
     } // if
 }
@@ -40,7 +40,7 @@ void Bank::withdraw( unsigned int id, unsigned int amount ) {
     } // if
     balances[id] -= amount;
     // if sufficient funds, wake up next withdraw call
-    if ( !withdrawBench[id].empty() && withdrawBench[id].front() >= balances[id] ) {
+    if ( !withdrawBench[id].empty() && withdrawBench[id].front() <= balances[id] ) {
         withdrawBench[id].signal();
     } // if
 }

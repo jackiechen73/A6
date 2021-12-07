@@ -4,7 +4,8 @@
  * This is the constructor for the Groupoff task.
  ****************************/
 Groupoff::Groupoff( Printer & prt, unsigned int numStudents, unsigned int sodaCost, unsigned int groupoffDelay )
-: printer(prt), numStudents(numStudents), sodaCost(sodaCost), groupoffDelay(groupoffDelay), WATCardList( new WATCard::FWATCard[numStudents] ) {}
+: printer( prt ), numStudents( numStudents ), sodaCost( sodaCost ), 
+groupoffDelay( groupoffDelay ), WATCardList( new WATCard::FWATCard[numStudents] ) {}
 
 /***** Groupoff::~Groupoff *****
  * This is the destructor for the Groupoff task.
@@ -29,6 +30,9 @@ WATCard::FWATCard Groupoff::giftCard() {
 
 /***** Groupoff::main *****
  * This is the task main.
+ * It starts by accepting a giftCard call from each student.
+ * Then, it periodically deposits into a random giftcard 
+ * until all cards have been deposited or the destructor is called.
  ****************************/
 void Groupoff::main() {
     printer.print(Printer::Kind::Groupoff, 'S'); // start
@@ -39,26 +43,29 @@ void Groupoff::main() {
     } // while
 
     bool deposited[numStudents] = { false }; // track deposited cards
-    // add money to each watcard
     // use cardIdx to keep track of number of undeposited cards
-    while ( cardIdx > 0 ) {
+    while ( cardIdx > 0 ) { // add money to each watcard
         _Accept( ~Groupoff ) {
-            break; // break for loop if destructor is called
+            break; // break out of for loop
         } _Else {
-            yield( groupoffDelay ); // delay
-            unsigned int depositIndex = mprng( 0, cardIdx - 1 ); // generate random index
-            // loop through to find the depositIndex-th undeposited card
+            yield( groupoffDelay ); // delay between deposits
+            // deposit money into the depositIndex-th undeposited card
+            unsigned int depositIndex = mprng( 0, cardIdx - 1 ); 
+            // find the depositIndex-th undeposited card
             for ( unsigned int i = 0; i < numStudents; i += 1 ) {
-                if ( deposited[i] ) { continue; }
-                if ( depositIndex == 0 ) {
-                    WATCard * watCard = new WATCard();  // create new watcard
-			        watCard->deposit( sodaCost );         // deposit money into watcard
-                    WATCardList[i].delivery( watCard );   // deliver watcard
+                if ( deposited[i] ) { continue; } // skip deposited ones
+
+                // found the depositIndex-th undeposited card?
+                if ( depositIndex == 0 ) { 
+                    WATCard * watCard = new WATCard();  // create watcard
+			        watCard->deposit( sodaCost );       // deposit money
+                    WATCardList[i].delivery( watCard ); // deliver watcard
                     printer.print( Printer::Kind::Groupoff, 'D', sodaCost ); // deliver
-                    cardIdx -= 1;
+                    cardIdx -= 1; // decrement unassigned counter
                     deposited[i] = true;
                     break;
                 } // if
+                
                 depositIndex -= 1; // found an empty watcard
             } // for
         } // _Accept

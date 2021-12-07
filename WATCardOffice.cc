@@ -10,7 +10,7 @@ void WATCardOffice::Courier::main() {
         if ( job == nullptr ) break; // no more jobs
         unsigned int sid = job->sid;
         unsigned int amount = job->amount;
-        WATCard * card = new WATCard();
+        WATCard * card = job->card;
         printer.print(Printer::Kind::Courier, id, 't', sid, amount); 
         bank.withdraw( sid, amount ); // withdraw new amount from bank
         if ( mprng(5) == 0 ) { // lost card?
@@ -67,9 +67,10 @@ void WATCardOffice::main() {
 }
 
 WATCard::FWATCard WATCardOffice::create( unsigned int sid, unsigned int amount ) {
-	WATCardOffice::sid = sid;
+	WATCard * card = new WATCard();
+    WATCardOffice::sid = sid;
     WATCardOffice::amount = amount;
-    Job * job = new Job(sid, amount);
+    Job * job = new Job(sid, amount, card);
 	jobs.push_back(job);
 	return job->result; // return watcard future
 }
@@ -77,14 +78,13 @@ WATCard::FWATCard WATCardOffice::create( unsigned int sid, unsigned int amount )
 WATCard::FWATCard WATCardOffice::transfer( unsigned int sid, unsigned int amount, WATCard * card ) {
     WATCardOffice::sid = sid;
     WATCardOffice::amount = amount;
-    Job * job = new Job(sid, amount + card->getBalance());
-    delete card; // delete old watcard
+    Job * job = new Job(sid, amount, card);
 	jobs.push_back(job);
 	return job->result; // return watcard future
 }
 
 WATCardOffice::Job * WATCardOffice::requestWork() {
-    if (jobs.size() == 0) return nullptr; // no more jobs
+    if ( jobs.size() == 0 ) return nullptr; // no more jobs
     Job * job = jobs.front();
     jobs.pop_front();
     return job;
