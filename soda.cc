@@ -1,13 +1,13 @@
 #include "bank.h"
-#include "bottlingplant.h"
+#include "bottlingPlant.h"
 #include "config.h"
 #include "groupoff.h"
-#include "nameserver.h"
+#include "nameServer.h"
 #include "parent.h"
 #include "printer.h"
 #include "student.h"
-#include "vendingmachine.h"
-#include "watcardoffice.h"
+#include "vendingMachine.h"
+#include "WATCardOffice.h"
 #include "MPRNG.h"
 #include <iostream>
 #include <string>

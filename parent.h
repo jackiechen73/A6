@@ -2,7 +2,7 @@
 #define PARENT_H
 
 #include "printer.h"
-#include "Bank.h"
+#include "bank.h"
 #include "MPRNG.h"
 
 extern MPRNG mprng;     // access MPRNG object from program main
