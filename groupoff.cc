@@ -1,16 +1,35 @@
 #include "groupoff.h"
 
+/***** Groupoff::Groupoff *****
+ * This is the constructor for the Groupoff task.
+ ****************************/
 Groupoff::Groupoff( Printer & prt, unsigned int numStudents, unsigned int sodaCost, unsigned int groupoffDelay )
 : printer(prt), numStudents(numStudents), sodaCost(sodaCost), groupoffDelay(groupoffDelay), WATCardList( new WATCard::FWATCard[numStudents] ) {}
 
+/***** Groupoff::~Groupoff *****
+ * This is the destructor for the Groupoff task.
+ ****************************/
 Groupoff::~Groupoff() {
+    // delete unused giftcards
+    for ( unsigned int i = 0 ; i < numStudents; i += 1 ) {
+        if ( WATCardList[i].available() ) {
+            delete WATCardList[i];
+        } // if
+    } // for
+    
     delete [] WATCardList;
 }
 
+/***** Groupoff::giftCard *****
+ * Return WATCard future.
+ ****************************/
 WATCard::FWATCard Groupoff::giftCard() {
     return WATCardList[cardIdx];
 }
 
+/***** Groupoff::main *****
+ * This is the task main.
+ ****************************/
 void Groupoff::main() {
     printer.print(Printer::Kind::Groupoff, 'S'); // start
     // each student obtains a future

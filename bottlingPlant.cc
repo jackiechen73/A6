@@ -1,56 +1,85 @@
 #include "bottlingPlant.h"
 #include "truck.h"
 
-BottlingPlant::BottlingPlant(Printer & prt, NameServer & nameServer,
+/***** BottlingPlant::BottlingPlant *****
+ * This the the constructor for the BottlingPlant.
+ * It initializes stock to 0.
+ * printer: shared printer
+ * nameServer: shared name server
+ * numVendingMachines: number of vending machines
+ * maxShippedPerFlavour: max sodas shipped per flavour
+ * maxStockPerFlavour: max sodas stocked per flavour
+ * timeBetweenShipments: delay between each shipment
+ ****************************/
+BottlingPlant::BottlingPlant( Printer & prt, NameServer & nameServer,
     unsigned int numVendingMachines, unsigned int maxShippedPerFlavour,
-    unsigned int maxStockPerFlavour, unsigned int timeBetweenShipments) : 
-    printer(prt), nameServer(nameServer), numVendingMachines(numVendingMachines),
-    maxShippedPerFlavour(maxShippedPerFlavour), maxStockPerFlavour(maxStockPerFlavour), 
-    timeBetweenShipments(timeBetweenShipments), stock(new unsigned int[VendingMachine::NUM_FLAVOURS]) {};
+    unsigned int maxStockPerFlavour, unsigned int timeBetweenShipments ) 
+    : printer( prt ), nameServer( nameServer ), numVendingMachines( numVendingMachines ),
+    maxShippedPerFlavour( maxShippedPerFlavour ), maxStockPerFlavour( maxStockPerFlavour ), 
+    timeBetweenShipments( timeBetweenShipments ), stock( new unsigned int[VendingMachine::NUM_FLAVOURS]{0} ) {};
 
+/***** BottlingPlant::~BottlingPlant *****
+ * This the the destructor for the BottlingPlant.
+ ****************************/
 BottlingPlant::~BottlingPlant() {
     delete [] stock;
 }
 
+/***** BottlingPlant::productionRun *****
+ * Simulates a production run.
+ * The BottlingPlant starts by yielding timeBetweenShipements times.
+ * Then, a random number of stock is produced for each flavour.
+ ****************************/
 void BottlingPlant::productionRun() {
-    yield(timeBetweenShipments);
-    unsigned int totalGenerated = 0;
-    for (unsigned int i = 0; i < VendingMachine::NUM_FLAVOURS; i++) {
-        stock[i] = mprng(maxShippedPerFlavour);
+    yield( timeBetweenShipments );
+    unsigned int totalGenerated = 0; // total number of sodas produced
+    // generate stock for each flavour
+    for ( unsigned int i = 0; i < VendingMachine::NUM_FLAVOURS; i += 1 ) {
+        stock[i] = mprng( maxShippedPerFlavour ); // random number of stock
         totalGenerated += stock[i];
     } // for
     printer.print(Printer::Kind::BottlingPlant, 'G', totalGenerated);
 }
 
+/***** BottlingPlant::main *****
+ * The main function of the task.
+ * The BottlingPlant creates the Truck 
+ * which transports the sodas to each vending machine.
+ * The plant periodically produces stock 
+ * and waits for the truck to call getShipment.
+ ****************************/
 void BottlingPlant::main() {
-    printer.print(Printer::Kind::BottlingPlant, 'S');
-    Truck truck(printer, nameServer, *this, numVendingMachines, maxStockPerFlavour);
+    printer.print( Printer::Kind::BottlingPlant, 'S' ); // start
+    // create the truck
+    Truck truck( printer, nameServer, *this, numVendingMachines, maxStockPerFlavour );
     for(;;) {
-        productionRun();
-        try {
-            _Enable {
-                _Accept(~BottlingPlant) {
-                    shutdown = true;
-                    _Accept(getShipment); // notify truck about shutdown
-                    // this accept should throw rendezvous failure
-                } or _Accept(getShipment) { // production run
-                    // copy stock to cargo
-                    for (unsigned int i = 0; i < VendingMachine::NUM_FLAVOURS; i++) {
-                        cargo[i] = stock[i];
-                    } // for
-                    updatingCargo.signalBlock();
-                    printer.print(Printer::Kind::BottlingPlant, 'P');
-                } // _Accept
-            } // _Enable
-        } catch (uMutexFailure::RendezvousFailure &) {
-            break;
-        } // catch accepts that fail
+        productionRun(); // produce stock
+        _Accept( ~BottlingPlant ) {
+            shutdown = true;                // plant is now shutdown
+            try {
+                _Enable {
+                    _Accept( getShipment ); // notify truck about shutdown
+                } // _Enable
+            } catch ( uMutexFailure::RendezvousFailure & ) {} // accept should fail
+            break;                          // break from for loop
+        } or _Accept( getShipment ) { // production run
+            for ( unsigned int i = 0; i < VendingMachine::NUM_FLAVOURS; i += 1 ) {
+                cargo[i] = stock[i];        // copy stock to cargo
+            } // for
+            updatingCargo.signalBlock();    // allow getShipment to finish
+            printer.print( Printer::Kind::BottlingPlant, 'P' ); // picked-up
+        } // _Accept
     } // for
-    printer.print(Printer::Kind::BottlingPlant, 'F');
+    printer.print( Printer::Kind::BottlingPlant, 'F' ); // finish
 }
 
+/***** BottlingPlant::getShipment *****
+ * Updates the cargo with the stock generated by the plant.
+ * This function is called by the Truck to pick-up new stock.
+ * cargo: truck cargo
+ ****************************/
 void BottlingPlant::getShipment(unsigned int cargo[]) {
-    if (shutdown) _Throw( Shutdown() );
-    BottlingPlant::cargo = cargo;
-    updatingCargo.wait();
+    if ( shutdown ) _Throw( Shutdown() );   // bottling plant is shutdown
+    BottlingPlant::cargo = cargo;           // update communication variable
+    updatingCargo.wait();                   // wait for main to update cargo
 }

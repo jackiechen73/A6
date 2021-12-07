@@ -67,11 +67,7 @@ void Student::main() {
             } // _Select
         } // for
     } // for
-
-    if (giftCard.available()) { // clean up unused giftcard?
-        delete giftCard;
-    } // if
-
+    
     try{
         if (watCard.available()) {
             delete watCard;

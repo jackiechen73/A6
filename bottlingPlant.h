@@ -6,20 +6,25 @@
 
 extern MPRNG mprng;     // access MPRNG object from program main
 
+/***** BottlingPlant *****
+ * The BottlingPlant periodically produces sodas 
+ * which are picked up by the Truck.
+ * The Truck will distribute the sodas to each vending machine.
+ ****************************/
 _Task BottlingPlant {
     Printer & printer;                  // shared printer
     NameServer & nameServer;            // shared name server
     unsigned int numVendingMachines;    // number of vending machines
-    unsigned int maxShippedPerFlavour; 
-    unsigned int maxStockPerFlavour;
-    unsigned int timeBetweenShipments;
+    unsigned int maxShippedPerFlavour;  // maximum shipped per flavour
+    unsigned int maxStockPerFlavour;    // maximum stock per flavour
+    unsigned int timeBetweenShipments;  // delay between shipments
 
-    bool shutdown = false;
-    uCondition updatingCargo; // wait for bottling plant to update cargo
-    unsigned int * stock; // amount of each flavour produced
-    unsigned int * cargo; // communication variable
-    void productionRun(); // simulates a production run
-    void main(); // task main
+    bool shutdown = false;              // is plant shutdown?
+    uCondition updatingCargo;           // wait for main to update cargo
+    unsigned int * stock;               // amount of each flavour produced
+    unsigned int * cargo;               // truck cargo (communication variable)
+    void productionRun();               // simulates a production run
+    void main();                        // task main
   public:
 	_Event Shutdown {};					// shutdown plant
 	BottlingPlant( Printer & prt, NameServer & nameServer, unsigned int numVendingMachines,
@@ -29,4 +34,4 @@ _Task BottlingPlant {
 	void getShipment( unsigned int cargo[] );
 };
 
-#endif
+#endif // BOTTLINGPLANT_H
