@@ -19,7 +19,6 @@ _Task Parent {
 	    void main();                // task main
     public:
 	    Parent( Printer & prt, Bank & bank, unsigned int numStudents, unsigned int parentalDelay );
-};
+}; // Parent
 
-#endif
-
+#endif // PARENT_H

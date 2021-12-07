@@ -16,6 +16,6 @@ _Monitor Bank {
         ~Bank();                            // destructor
         void deposit( unsigned int id, unsigned int amount ); // deposit amount
         void withdraw( unsigned int id, unsigned int amount ); // withdraw amount
-};
+}; // Bank
 
 #endif // BANK_H
