@@ -32,7 +32,8 @@ void Truck::main() {
     printer.print( Printer::Kind::Truck, 'S' ); // start
     // get array of vending machine pointers
     VendingMachine** machineList = nameServer.getMachineList();
-    unsigned int curMachine = 0;
+    // start at the end of the vending machine array
+    unsigned int curMachine = numVendingMachines - 1;
     for (;;) {
         // yield to get coffee
         yield( mprng( 1, 10 ) );
@@ -44,8 +45,10 @@ void Truck::main() {
             break;
         } // try
         // print the count of cargo picked up
-        printer.print( Printer::Kind::Truck, 'P', cargoCount() ); 
-        
+        printer.print( Printer::Kind::Truck, 'P', cargoCount() );
+
+        // move past the previously stocked machine
+        curMachine = (curMachine + 1) % numVendingMachines;
         // transfer as much of each kind of soda to each machine
         unsigned int startingMachine = curMachine;
         for ( ;; ) {
